@@ -1,19 +1,37 @@
 <script>
-  // Importa los iconos individuales que necesitas
-  import { faPlus } from "@fortawesome/free-solid-svg-icons";
-  import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
-  import { faXmark } from "@fortawesome/free-solid-svg-icons";
-  // Importa el componente FontAwesomeIcon
+  // Importar
+  import Swal from "sweetalert2";
+  import {
+    faPlus,
+    faTrashCan,
+    faXmark,
+  } from "@fortawesome/free-solid-svg-icons";
   import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
 
   let tasks = [];
   let newTask = "";
+  const maxTaskLength = 50; // Establecer un máximo para la longitud de la tarea
 
+  // Función para agregar tareas
   function addTask() {
-    if (newTask.trim() !== "") {
-      tasks = [...tasks, { id: Date.now(), text: newTask, done: false }];
-      newTask = "";
+    if (newTask.trim() === "") {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "La tarea no puede estar vacía!",
+      });
+      return;
+    } else if (newTask.trim().length > maxTaskLength) {
+      Swal.fire({
+        icon: "warning",
+        title: "Tarea demasiado larga",
+        text: `La tarea no puede exceder los ${maxTaskLength} caracteres.`,
+      });
+      return;
     }
+
+    tasks = [...tasks, { id: Date.now(), text: newTask.trim(), done: false }];
+    newTask = "";
   }
 
   function removeTask(taskId) {
@@ -100,68 +118,143 @@
 </main>
 
 <style>
-  .done {
-    text-decoration: line-through;
-  }
-  /* Estilos adicionales para editar las tareas */
-  span[contenteditable] {
-    display: inline-block;
-    min-width: 100px;
-    margin-right: 10px;
-    border-bottom: 1px solid #ddd; /* Indica que el elemento es editable */
-    word-break: break-word; /* Asegura que las palabras se rompan si es necesario */
-  }
-  span[contenteditable]:focus {
-    outline: none;
-    border-bottom: 2px solid blue; /* Destaca el elemento al editarlo */
-  }
-  /* Estilos para el botón pequeño */
-  .small-button {
-    padding: 0.4em 0.8em; /* Ajusta el padding para hacer el botón más pequeño */
-  }
-  /* Estilos para las tareas que no son editables */
-  .non-editable {
-    pointer-events: none; /* Deshabilita eventos del ratón para evitar la edición */
-    border-bottom: none; /* Quita el borde que indica edición */
-  }
-  .header {
-    position: relative;
-    padding-right: 40px; /* Asegúrate de tener suficiente espacio para el botón */
-  }
-  .title-1 {
-    width: 100%;
-  }
+/* Variables de colores y fuentes */
+:root {
+  --font-main: Inter, system-ui, sans-serif;
+  --color-text: #e0e0e0;
+  --color-bg: #333;
+  --color-link: #646cff;
+  --color-link-hover: #535bf2;
+  --color-btn: #1a1a1a;
+  --color-btn-hover: #646cff;
+  --color-task: #1c1c1c;
+  --color-delete-btn: #ff6347;
+  --color-delete-hover: #ffaaaa;
+  --color-disabled: #858585;
+}
 
-  .clear-completed-btn {
-    position: absolute;
-    right: 0;
-    top: 0;
-    padding: 0.5em 1em;
-  }
+/* Título principal */
+.title-1 {
+  font-size: 2rem;
+  margin: 1rem 0;
+}
 
-  .delete-task-btn {
-    background-color: #ffcccc; /* Rojo claro para el fondo */
-    color: #ff0000; /* Rojo para el ícono */
-    border: none;
-    margin-left: 10px;
-    cursor: pointer;
-  }
-  .delete-task-btn:hover {
-    background-color: #ffaaaa; /* Un poco más oscuro al pasar el mouse */
-  }
+/* Botones genéricos */
+button {
+  padding: 0.5em 1em;
+  font-family: var(--font-main);
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.25s;
+}
 
-  /* Truncamiento del texto para tareas con mucho texto */
-  span {
-    display: inline-block;
-    max-width: 60%; /* o el máximo que prefieras */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+/* Botón para borrar tareas completadas */
+.clear-completed-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  color: var(--color-delete-btn);
+}
 
-  /* Deshabilitar el botón si no hay texto en la entrada */
-  .add-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+/* Input de tareas y botón de añadir */
+.input-group {
+  margin-right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.task-input {
+  color: #000;
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+
+/* Botón para añadir tarea */
+.add-button {
+  background-color: var(--color-link);
+  color: white;
+}
+
+.add-button:disabled {
+  background-color: var(--color-disabled);
+  cursor: not-allowed;
+}
+
+/* Lista de tareas */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  background: var(--color-task);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Tarea completada */
+.done {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* Editable y no editable */
+span[contenteditable] {
+  border-bottom: 1px solid #ddd;
+}
+
+span[contenteditable]:focus {
+  border-bottom: 2px solid blue;
+}
+
+.non-editable {
+  pointer-events: none;
+  border-bottom: none;
+}
+
+/* Botón de eliminar tarea */
+.delete-task-btn {
+  background-color: var(--color-delete-btn);
+  color: white;
+}
+
+.delete-task-btn:hover {
+  background-color: var(--color-delete-hover);
+}
+
+/* Texto de la tarea */
+span {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Media queries para tema claro y oscuro */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-text: #213547;
+    --color-bg: #ffffff;
+    --color-btn: #f9f9f9;
+    --color-link-hover: #747bff;
   }
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .task-input {
+    width: auto;
+  }
+}
+
 </style>
