@@ -52,10 +52,25 @@
   // Función para editar la descripción de la tarea
   function editTask(taskId, newText) {
     const sanitizedText = sanitizeString(newText);
+    if (sanitizedText.length > maxTaskLength) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `La tarea no puede exceder los ${maxTaskLength} caracteres.`,
+      });
+      // Encuentra la tarea actual y reestablece su valor a la versión no editada
+      const currentTask = tasks.find((task) => task.id === taskId);
+      if (currentTask) {
+        currentTask.text = currentTask.text.substring(0, maxTaskLength);
+      }
+      return;
+    }
+
     tasks = tasks.map((task) =>
       task.id === taskId && !task.done ? { ...task, text: sanitizedText } : task
     );
   }
+
   // Función para obtener solo las tareas no completadas
   function clearCompleted() {
     tasks = tasks.filter((task) => !task.done);
@@ -102,7 +117,7 @@
           contenteditable={!task.done}
           on:input={(event) => {
             if (event.target instanceof HTMLElement) {
-              editTask(task.id, event.target.textContent);
+              editTask(task.id, event.target.innerText);
             }
           }}
           class:non-editable={task.done}
@@ -118,143 +133,142 @@
 </main>
 
 <style>
-/* Variables de colores y fuentes */
-:root {
-  --font-main: Inter, system-ui, sans-serif;
-  --color-text: #e0e0e0;
-  --color-bg: #333;
-  --color-link: #646cff;
-  --color-link-hover: #535bf2;
-  --color-btn: #1a1a1a;
-  --color-btn-hover: #646cff;
-  --color-task: #1c1c1c;
-  --color-delete-btn: #ff6347;
-  --color-delete-hover: #ffaaaa;
-  --color-disabled: #858585;
-}
-
-/* Título principal */
-.title-1 {
-  font-size: 2rem;
-  margin: 1rem 0;
-}
-
-/* Botones genéricos */
-button {
-  padding: 0.5em 1em;
-  font-family: var(--font-main);
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-  transition: background-color 0.25s;
-}
-
-/* Botón para borrar tareas completadas */
-.clear-completed-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  background: none;
-  color: var(--color-delete-btn);
-}
-
-/* Input de tareas y botón de añadir */
-.input-group {
-  margin-right: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.task-input {
-  color: #000;
-  flex-grow: 1;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.5em;
-}
-
-/* Botón para añadir tarea */
-.add-button {
-  background-color: var(--color-link);
-  color: white;
-}
-
-.add-button:disabled {
-  background-color: var(--color-disabled);
-  cursor: not-allowed;
-}
-
-/* Lista de tareas */
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-li {
-  background: var(--color-task);
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Tarea completada */
-.done {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-
-/* Editable y no editable */
-span[contenteditable] {
-  border-bottom: 1px solid #ddd;
-}
-
-span[contenteditable]:focus {
-  border-bottom: 2px solid blue;
-}
-
-.non-editable {
-  pointer-events: none;
-  border-bottom: none;
-}
-
-/* Botón de eliminar tarea */
-.delete-task-btn {
-  background-color: var(--color-delete-btn);
-  color: white;
-}
-
-.delete-task-btn:hover {
-  background-color: var(--color-delete-hover);
-}
-
-/* Texto de la tarea */
-span {
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Media queries para tema claro y oscuro */
-@media (prefers-color-scheme: light) {
+  /* Variables de colores y fuentes */
   :root {
-    --color-text: #213547;
-    --color-bg: #ffffff;
-    --color-btn: #f9f9f9;
-    --color-link-hover: #747bff;
+    --font-main: Inter, system-ui, sans-serif;
+    --color-text: #e0e0e0;
+    --color-bg: #333;
+    --color-link: #646cff;
+    --color-link-hover: #535bf2;
+    --color-btn: #1a1a1a;
+    --color-btn-hover: #646cff;
+    --color-task: #1c1c1c;
+    --color-delete-btn: #ff6347;
+    --color-delete-hover: #ffaaaa;
+    --color-disabled: #858585;
   }
-}
 
-/* Media queries para responsividad */
-@media (max-width: 768px) {
+  /* Título principal */
+  .title-1 {
+    font-size: 2rem;
+    margin: 1rem 0;
+  }
+
+  /* Botones genéricos */
+  button {
+    padding: 0.5em 1em;
+    font-family: var(--font-main);
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.25s;
+  }
+
+  /* Botón para borrar tareas completadas */
+  .clear-completed-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: none;
+    color: var(--color-delete-btn);
+  }
+
+  /* Input de tareas y botón de añadir */
+  .input-group {
+    margin-right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
   .task-input {
-    width: auto;
+    color: #000;
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5em;
   }
-}
 
+  /* Botón para añadir tarea */
+  .add-button {
+    background-color: var(--color-link);
+    color: white;
+  }
+
+  .add-button:disabled {
+    background-color: var(--color-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Lista de tareas */
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    background: var(--color-task);
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Tarea completada */
+  .done {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  /* Editable y no editable */
+  span[contenteditable] {
+    border-bottom: 1px solid #ddd;
+  }
+
+  span[contenteditable]:focus {
+    border-bottom: 2px solid blue;
+  }
+
+  .non-editable {
+    pointer-events: none;
+    border-bottom: none;
+  }
+
+  /* Botón de eliminar tarea */
+  .delete-task-btn {
+    background-color: var(--color-delete-btn);
+    color: white;
+  }
+
+  .delete-task-btn:hover {
+    background-color: var(--color-delete-hover);
+  }
+
+  /* Texto de la tarea */
+  span {
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Media queries para tema claro y oscuro */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --color-text: #213547;
+      --color-bg: #ffffff;
+      --color-btn: #f9f9f9;
+      --color-link-hover: #747bff;
+    }
+  }
+
+  /* Media queries para responsividad */
+  @media (max-width: 768px) {
+    .task-input {
+      width: auto;
+    }
+  }
 </style>
