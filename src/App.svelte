@@ -12,7 +12,12 @@
   let newTask = "";
   const maxTaskLength = 50; // Establecer un máximo para la longitud de la tarea
 
-  // Función para agregar tareas
+  /**
+   * Función que agrega una tarea a la lista de tareas.
+   * Si la tarea está vacía, muestra un mensaje de error.
+   * Si la tarea excede la longitud máxima permitida, muestra un mensaje de advertencia.
+   * @returns {void}
+   */
   function addTask() {
     if (newTask.trim() === "") {
       Swal.fire({
@@ -34,10 +39,18 @@
     newTask = "";
   }
 
+  /**
+   * Elimina una tarea de la lista de tareas.
+   * @param {number} taskId - El ID de la tarea a eliminar.
+   */
   function removeTask(taskId) {
     tasks = tasks.filter((task) => task.id !== taskId);
   }
 
+  /**
+   * Función que cambia el estado de una tarea a completada o no completada.
+   * @param {number} taskId - El id de la tarea a cambiar.
+   */
   function toggleDone(taskId) {
     tasks = tasks.map((task) =>
       task.id === taskId ? { ...task, done: !task.done } : task
@@ -49,7 +62,12 @@
     return str.replace(/<\/?[^>]+(>|$)/g, "");
   }
 
-  // Función para editar la descripción de la tarea
+  /**
+   * Función que edita una tarea existente en la lista de tareas.
+   * @param {number} taskId - El ID de la tarea a editar.
+   * @param {string} newText - El nuevo texto de la tarea.
+   * @returns {void}
+   */
   function editTask(taskId, newText) {
     const sanitizedText = sanitizeString(newText);
     if (sanitizedText.length > maxTaskLength) {
@@ -71,10 +89,13 @@
     );
   }
 
-  // Función para obtener solo las tareas no completadas
+  /**
+   * Función que elimina las tareas completadas de la lista de tareas.
+   */
   function clearCompleted() {
     tasks = tasks.filter((task) => !task.done);
   }
+
   $: isAddButtonDisabled = newTask.trim() === "";
 </script>
 
